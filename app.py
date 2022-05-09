@@ -3,9 +3,11 @@ from flask import Flask
 import joblib
 import librosa
 import numpy as np
+import os
 import test
 
 app = Flask(__name__)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # 모든 음성파일의 길이가 같도록 후위에 padding 처리
 pad2d = lambda a, i: a[:, 0:i] if a.shape[1] > i else np.hstack((a, np.zeros((a.shape[0], i - a.shape[1]))))
@@ -17,10 +19,9 @@ def hello_world():  # put application's code here
     return 'Hello World!'
 
 
-@app.route('/test')
+@app.route('/audio_sentiment')
 def audio_test():  # put application's code here
-    load_audio("./test2.wav")
-    return '성공 ! !'
+    return load_audio("./test/happy.wav")
 
 
 if __name__ == '__main__':
@@ -37,4 +38,7 @@ def load_audio(audio_name):
     # 파일로 저장된 모델 불러와서 예측
     clf_from_joblib = joblib.load('model/mfcc.pkl')
     result = clf_from_joblib.predict(padded_mfcc)
-    print(result)
+    if result[0][0] >= result[0][1]:
+        return "긍정"
+    else:
+        return "부정"
