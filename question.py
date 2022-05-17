@@ -1,4 +1,3 @@
-from konlpy.tag import Komoran
 from textrank.textrank import KeywordSummarizer
 from pororo import Pororo
 import pandas as pd
@@ -6,11 +5,15 @@ from sentence_transformers import util
 import torch
 import numpy as np
 from tqdm import tqdm
+from setting import komoran1
+
+
+def get_komoran():
+    return
 
 
 def komoran_tokenizer(sent):
-    komoran = Komoran()
-    words = komoran.pos(sent, join=True)
+    words = komoran1.pos(sent, join=True)
     words = [w for w in words if ('/NN' in w or '/NP' in w or '/SL' in w)]
     return words
 
@@ -20,10 +23,8 @@ def get_keyword_summarizer(text):
     results = []
     keyword_summarizer = KeywordSummarizer(tokenize=komoran_tokenizer, min_count=1, min_cooccurrence=2)
     texts = keyword_summarizer.summarize(text, topk=30)
-
     for i in texts:
         results.append(i[0].split('/')[0])
-
     return results
 
 
@@ -49,8 +50,6 @@ def chat(results, sent="0"):
         cos_sim = util.pytorch_cos_sim(q, EmbData)
         # 유사도가 가장 비슷한 질문 인덱스를 구합니다.
         best_sim_idx = np.where(cos_sim >= 0.73)
-
         for i in best_sim_idx[1]:
             result.append(Chatbot_Data['A'][i])
-
     return set(result)

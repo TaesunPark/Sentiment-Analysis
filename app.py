@@ -30,6 +30,7 @@ def analyze_self_introduction():
     result = question.get_keyword_summarizer(text)
     return str(question.chat(result))
 
+
 if __name__ == '__main__':
     app.run()
 
