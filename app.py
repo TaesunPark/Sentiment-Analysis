@@ -7,6 +7,7 @@ import numpy as np
 import os
 import base64
 import tensorflow
+import json
 
 app = Flask(__name__)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -49,10 +50,16 @@ def load_audio(audio_name):
     # 파일로 저장된 모델 불러와서 예측
     clf_from_joblib = joblib.load('model/mfcc.pkl')
     result = clf_from_joblib.predict(padded_mfcc)
-    if result[0][0] >= result[0][1]:
-        return "긍정"
-    else:
-        return "부정"
+
+    l_list = {'p' : str(int(result[0][0] * 100)), 'n' : str(int(result[0][1] * 100))}
+    jsonStr = json.dumps(l_list)
+    return jsonStr
+
+    #return result
+    # if result[0][0] >= result[0][1]:
+    #     return "긍정"
+    # else:
+    #     return "부정"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port='5000', debug=True)
