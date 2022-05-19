@@ -37,7 +37,7 @@ def audio_test():  # put application's code here
 
     except Exception as e:
         print(str(e))
-        return "error"
+        return "error-1"
 
 def load_audio(audio_name):
 
