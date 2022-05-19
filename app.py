@@ -6,6 +6,7 @@ import numpy as np
 import os
 import test
 import question
+import sentiment_text
 
 app = Flask(__name__)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -26,10 +27,14 @@ def audio_test():  # put application's code here
 
 @app.route('/analysis')
 def analyze_self_introduction():
-    text = "리눅스의 기본명령어를 이해 합니다.\nAWS EC2 서버를 호스팅 하여 소프트웨어 설치 및 config파일을 수정 및 서비스를 구동 할 수 있습니다.\n도커를 이용하여 Flask, Spring-boot 를 배포한 경험이 있습니다.\nNginx를 이용하여 포트 포워딩 및 로드 밸런싱, ssl 인증서를 적용한 경험이 있습니다.\n인프라를 구축하고 무중단 배포한 경험이 있습니다."
+    text = ""
     result = question.get_keyword_summarizer(text)
     return str(question.chat(result))
 
+
+@app.route('/bertmodel')
+def get_bert_model():
+    return sentiment_text.get_bert_model("상벽아 안녕")
 
 if __name__ == '__main__':
     app.run()
