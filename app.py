@@ -32,7 +32,7 @@ def audio_test():  # put application's code here
         wav_file = open("./test/data1.wav", "wb")
         wav_file.write(decode_string)
 
-        return load_audio("./test/happy.wav")
+        return load_audio("./test/data1.wav")
 
     except Exception as e:
         print(str(e))
