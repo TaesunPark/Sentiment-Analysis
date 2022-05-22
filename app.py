@@ -1,9 +1,13 @@
 import sklearn
 from flask import Flask
+from flask import request
 import joblib
 import librosa
 import numpy as np
 import os
+import base64
+import tensorflow
+import json
 import test
 import question
 import sentiment_text
@@ -19,12 +23,6 @@ pad2d = lambda a, i: a[:, 0:i] if a.shape[1] > i else np.hstack((a, np.zeros((a.
 @app.route('/')
 def hello_world():  # put application's code here
     return 'Hello World!'
-
-
-@app.route('/audio_sentiment')
-def audio_test():  # put application's code here
-    return load_audio("./test/happy.wav")
-
 
 @app.route('/analysis')
 def analyze_self_introduction():
@@ -46,16 +44,30 @@ def get_wordcloud():
     produce_wordcloud.create_wordcloud(tags)
     return "생성 성공"
 
-
 @app.route('/bertmodel')
 def get_bert_model():
     return sentiment_text.get_bert_model("상벽아 안녕")
 
-if __name__ == '__main__':
-    app.run()
+@app.route('/audio-sentiment', methods=['POST'])
+def audio_test():  # put application's code here
 
+    # return load_audio("./test/happy.wav")
+    base64data = request.get_json().get('base64data').split(',')[1]
+
+    try:
+        decode_string = base64.b64decode(base64data)
+
+        wav_file = open("./test/data1.wav", "wb")
+        wav_file.write(decode_string)
+
+        return load_audio("./test/data1.wav")
+
+    except Exception as e:
+        print(str(e))
+        return "error-1"
 
 def load_audio(audio_name):
+
     audio, sr = librosa.load(audio_name)
     mfcc = librosa.feature.mfcc(audio, sr=16000, n_mfcc=100, n_fft=400, hop_length=160)
     mfcc = sklearn.preprocessing.scale(mfcc, axis=1)
@@ -65,7 +77,15 @@ def load_audio(audio_name):
     # 파일로 저장된 모델 불러와서 예측
     clf_from_joblib = joblib.load('model/mfcc.pkl')
     result = clf_from_joblib.predict(padded_mfcc)
-    if result[0][0] >= result[0][1]:
-        return "긍정"
-    else:
-        return "부정"
+
+    l_list = {'p': str(int(result[0][0] * 100)), 'n': str(int(result[0][1] * 100))}
+    jsonStr = json.dumps(l_list)
+    return jsonStr
+
+if __name__ == '__main__':
+        app.run(host='0.0.0.0', port='5000', debug=True)
+
+
+
+
+
