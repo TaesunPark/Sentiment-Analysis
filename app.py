@@ -8,6 +8,9 @@ import os
 import base64
 import tensorflow
 import json
+import test
+import question
+import sentiment_text
 
 app = Flask(__name__)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -18,8 +21,17 @@ pad2d = lambda a, i: a[:, 0:i] if a.shape[1] > i else np.hstack((a, np.zeros((a.
 
 @app.route('/')
 def hello_world():  # put application's code here
-
     return 'Hello World!'
+
+@app.route('/analysis')
+def analyze_self_introduction():
+    text = ""
+    result = question.get_keyword_summarizer(text)
+    return str(question.chat(result))
+
+@app.route('/bertmodel')
+def get_bert_model():
+    return sentiment_text.get_bert_model("상벽아 안녕")
 
 @app.route('/audio-sentiment', methods=['POST'])
 def audio_test():  # put application's code here
@@ -51,18 +63,14 @@ def load_audio(audio_name):
     clf_from_joblib = joblib.load('model/mfcc.pkl')
     result = clf_from_joblib.predict(padded_mfcc)
 
-    l_list = {'p' : str(int(result[0][0] * 100)), 'n' : str(int(result[0][1] * 100))}
+    l_list = {'p': str(int(result[0][0] * 100)), 'n': str(int(result[0][1] * 100))}
     jsonStr = json.dumps(l_list)
     return jsonStr
 
-    #return result
-    # if result[0][0] >= result[0][1]:
-    #     return "긍정"
-    # else:
-    #     return "부정"
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='5000', debug=True)
+        app.run(host='0.0.0.0', port='5000', debug=True)
+
+
 
 
 
