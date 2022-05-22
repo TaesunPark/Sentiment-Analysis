@@ -127,3 +127,8 @@ word2word==1.0.0
 wrapt==1.14.1
 yarl==1.7.2
 zipp==3.8.0
+
+flask~=2.0.3
+kobert~=0.2.3
+setuptools~=61.2.0
+wordcloud~=1.8.1

@@ -7,6 +7,7 @@ import os
 import test
 import question
 import sentiment_text
+import produce_wordcloud
 
 app = Flask(__name__)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -27,9 +28,23 @@ def audio_test():  # put application's code here
 
 @app.route('/analysis')
 def analyze_self_introduction():
-    text = ""
-    result = question.get_keyword_summarizer(text)
-    return str(question.chat(result))
+    text = "Android로 직접 화면 구성을 하고, MVP 디자인 패턴을 활용해 앱을 만들어봤습니다.시뮬레이터를 통한 테스트를 진행하였고 출시를 위한 프로세스를 이해하고 있습니다.html, css, js를 사용해 스마트 워치 기반 Tizen 웹 어플리케이션을 만들어봤습니다."
+    file_dir = "./data/test.csv"
+    result = question.get_keyword_summarizer(text, "text")
+    return str(question.chat(result, file_dir, "text"))
+
+
+@app.route('/wordcloud')
+def get_wordcloud():
+    text = "안녕하세요 저는 박태순이고요 아니 그 그렇지만 그런 방식을 좋아합니다."
+    file_dir = "./data/qs.csv"
+    first_list = question.get_keyword_summarizer(text, "wordcloud")
+    result = question.chat(first_list, file_dir, "wordcloud")
+    print(result)
+    tags = produce_wordcloud.get_wordcloud_list(result)
+    print(tags)
+    produce_wordcloud.create_wordcloud(tags)
+    return "생성 성공"
 
 
 @app.route('/bertmodel')

@@ -18,10 +18,20 @@ def komoran_tokenizer(sent):
     return words
 
 
-def get_keyword_summarizer(text):
+def komoran_tokenizer_wordcloud(sent):
+    words = komoran1.pos(sent, join=True)
+    words = [w for w in words if ('/NN' in w or '/NP' in w or '/SL' in w or '/VV' in w or '/MM' in w or '/MA' in w)]
+    return words
+
+
+def get_keyword_summarizer(text, type):
     text = text.split("\n")
     results = []
-    keyword_summarizer = KeywordSummarizer(tokenize=komoran_tokenizer, min_count=1, min_cooccurrence=2)
+    if type == "wordcloud":
+        keyword_summarizer = KeywordSummarizer(tokenize=komoran_tokenizer_wordcloud, min_count=1, min_cooccurrence=2)
+    else:
+        keyword_summarizer = KeywordSummarizer(tokenize=komoran_tokenizer, min_count=1, min_cooccurrence=2)
+
     texts = keyword_summarizer.summarize(text, topk=30)
     for i in texts:
         results.append(i[0].split('/')[0])
@@ -33,10 +43,16 @@ def get_csv_data(dir):
     return Chatbot_Data
 
 
-def chat(results, sent="0"):
+def chat(results, dir, type, sent="0"):
+    qa_percent = 0
+    if type == "wordcloud":
+        qa_percent = 0.9
+    else:
+        qa_percent = 0.73
+
     result = []
     tqdm.pandas()
-    Chatbot_Data = get_csv_data("./data/test.csv")
+    Chatbot_Data = get_csv_data(dir)
     sTe = Pororo(task="sentence_embedding", lang="ko")
     Chatbot_Data['EmbVector'] = Chatbot_Data['Q'].progress_map(lambda x: sTe(x))
     EmbData = torch.tensor(Chatbot_Data['EmbVector'].tolist())
@@ -49,7 +65,10 @@ def chat(results, sent="0"):
         # 코사인 유사도
         cos_sim = util.pytorch_cos_sim(q, EmbData)
         # 유사도가 가장 비슷한 질문 인덱스를 구합니다.
-        best_sim_idx = np.where(cos_sim >= 0.73)
+        best_sim_idx = np.where(cos_sim >= qa_percent)
         for i in best_sim_idx[1]:
             result.append(Chatbot_Data['A'][i])
-    return set(result)
+
+        if type == "wordcloud":
+            return result
+        return set(result)
