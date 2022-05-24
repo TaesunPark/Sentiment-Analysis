@@ -49,7 +49,7 @@ def chat(result_list, dir, type, sent="0"):
     print(result_list)
     qa_percent = 0
     if type == 2:
-        qa_percent = 0.9
+        qa_percent = 0.75
     else:
         qa_percent = 0.73
 
